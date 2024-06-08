@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market Tracker</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color:blue;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .stock-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .stock-card {
+            width: 200px;
+            margin: 10px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stock Market Tracker</h1>
+        <div class="stock-container" id="stock-container"></div>
+    </div>
+
+    <script>
+        
+        const API_KEY = 'YOUR_API_KEY';
+        const symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN']; 
+
+        const stockContainer = document.getElementById('stock-container');
+
+        async function fetchStockData(symbol) {
+            try {
+                const response = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching stock data:', error);
+                return null;
+            }
+        }
+
+        async function renderStocks() {
+            stockContainer.innerHTML = ''; // Clear previous stock cards
+
+            for (const symbol of symbols) {
+                const stockData = await fetchStockData(symbol);
+                if (stockData && stockData['Global Quote']) {
+                    const { "01. symbol": symbol, "05. price": price, "10. change percent": changePercent } = stockData['Global Quote'];
+
+                    const stockCard = document.createElement('div');
+                    stockCard.classList.add('stock-card');
+                    stockCard.innerHTML = `
+                        <h3>${symbol}</h3>
+                        <p>Price: $${price}</p>
+                        <p>Change: ${changePercent}</p>
+                    `;
+                    stockContainer.appendChild(stockCard);
+                } else {
+                    console.error(`ture to fetch data for ${symbol}`);
+                }
+            }
+        }
+
+        renderStocks(); 
+
+        
+        setInterval(renderStocks, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
